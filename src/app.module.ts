@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { LeadsModule } from './leads/leads.module';
 import { BotpressServiceModule } from './botpress-service/botpress-service.module';
 import { LeadScoringModule } from './lead-scoring/lead-scoring.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { LeadScoringModule } from './lead-scoring/lead-scoring.module';
     LeadsModule,
     BotpressServiceModule,
     LeadScoringModule,
+    SettingsModule,
   ],
 })
 export class AppModule {}
