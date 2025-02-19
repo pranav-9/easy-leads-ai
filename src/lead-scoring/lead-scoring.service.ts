@@ -33,17 +33,17 @@ export class LeadScoringService {
     };
 
     private disqualificationCriteria = {
-        minBudget: 500, // Minimum budget required
-        wrongIndustry: ['unrelated_industry'], // Industries that are disqualified
+        minBudget: 500,
+        wrongIndustry: ['unrelated_industry'],
     };
 
     /**
-     * Computes the lead score based on explicit and implicit factors.
+     * Computes the lead score and determines if it should be handed off to sales.
      */
-    calculateLeadScore(lead: LeadData): { score: number; category: string } {
+    calculateLeadScore(lead: LeadData): { score: number; category: string; shouldHandoff: boolean } {
         let score = 0;
 
-        // Explicit Scoring (Firmographics & Budget)
+        // Explicit Scoring
         if (lead.jobTitle) score += this.weights.jobTitle;
         if (lead.budget && lead.budget >= this.disqualificationCriteria.minBudget) {
             score += this.weights.budget;
@@ -58,14 +58,17 @@ export class LeadScoringService {
         if (lead.responseTime) score += this.weights.responseTime / lead.responseTime;
         if (lead.questionsAsked) score += lead.questionsAsked * this.weights.questionsAsked;
 
-        // Determine lead category
+        // Determine category
         let category = 'Cold';
+        let shouldHandoff = false;
+
         if (score >= 50) {
             category = 'Hot';
+            shouldHandoff = true;  // Only hand off "Hot" leads
         } else if (score >= 30) {
             category = 'Warm';
         }
 
-        return { score, category };
+        return { score, category, shouldHandoff };
     }
 }

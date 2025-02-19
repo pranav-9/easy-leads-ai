@@ -5,5 +5,6 @@ import { LeadScoringController } from './lead-scoring.controller';
 @Module({
   controllers: [LeadScoringController],
   providers: [LeadScoringService],
+  exports: [LeadScoringService],
 })
-export class LeadScoringModule {}
+export class LeadScoringModule { }
