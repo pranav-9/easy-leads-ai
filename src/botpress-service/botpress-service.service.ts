@@ -1,63 +1,47 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import axios from 'axios';
+import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Lead, LeadDocument } from '../leads/schema/leads.schema';
+import { SettingsService } from '../settings/settings.service';
 
 @Injectable()
 export class BotpressService {
-    private botpressUrl = process.env.BOTPRESS_URL || 'https://api.botpress.cloud/v1';
-    private botpressToken = process.env.BOTPRESS_TOKEN || 'token';
+    constructor(
+        private httpService: HttpService,
+        @InjectModel(Lead.name) private leadModel: Model<LeadDocument>,
+        private settingsService: SettingsService
+    ) {}
 
-    /**
-     * Start a WhatsApp conversation with a lead
-     */
-    async startConversation(leadId: string, phone: string, initialMessage?: string) {
-        try {
-            const response = await axios.post(
-                `${this.botpressUrl}/chat/conversations`,
-                {
-                    leadId,
-                    phone,
-                    message: initialMessage || "Hello, let's begin your qualification process.",
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${this.botpressToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                },
-            );
-            return response.data;
-        } catch (error) {
-            throw new HttpException(
-                error.response?.data || 'Error starting conversation',
-                HttpStatus.INTERNAL_SERVER_ERROR,
-            );
+    async startChat(leadId: string): Promise<any> {
+        const lead = await this.leadModel.findById(leadId);
+        if (!lead) throw new Error('Lead not found');
+
+        const chatbotSettings = await this.settingsService.getChatbotSettings();
+        const icpSettings = await this.settingsService.getICPSettings();
+
+        const message = this.generateFirstMessage(lead, chatbotSettings, icpSettings);
+        
+        return this.sendToBotpress(lead.phone, message);
+    }
+
+    private generateFirstMessage(lead: Lead, chatbotSettings: any, icpSettings: any): string {
+        const tone = chatbotSettings.tone || 'friendly';
+        const industry = lead.industry || 'your industry';
+        const budget = lead.budget ? `$${lead.budget}` : 'your estimated budget';
+        const role = lead.jobTitle || 'your role';
+
+        if (tone === 'friendly') {
+            return `Hey there! 😊 We noticed you're in ${industry} and might be looking for solutions. What’s your estimated budget?`;
+        } else if (tone === 'consultative') {
+            return `Hi, I see you’re a ${role} in ${industry}. We specialize in helping businesses like yours. Can we discuss your needs?`;
+        } else {
+            return `Hello, we noticed you're interested in our services. Do you have a budget range in mind?`;
         }
     }
 
-    /**
-     * Process a response from the user
-     */
-    async processResponse(leadId: string, userResponse: string) {
-        try {
-            const response = await axios.post(
-                `${this.botpressUrl}/conversations/respond`,
-                {
-                    leadId,
-                    message: userResponse,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${this.botpressToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                },
-            );
-            return response.data;
-        } catch (error) {
-            throw new HttpException(
-                error.response?.data || 'Error processing response',
-                HttpStatus.INTERNAL_SERVER_ERROR,
-            );
-        }
+    private async sendToBotpress(phone: string, message: string): Promise<any> {
+        const botpressUrl = 'https://api.botpress.cloud/api/v1';
+        return this.httpService.post(botpressUrl, { phone, message }).toPromise();
     }
 }

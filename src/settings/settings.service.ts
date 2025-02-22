@@ -14,4 +14,12 @@ export class SettingsService {
     async getSettings(type: string): Promise<Settings | null> {
         return this.settingsModel.findOne({ type });
     }
+
+    async getChatbotSettings(): Promise<any> {
+        return this.getSettings('chatbot');
+    }
+
+    async getICPSettings(): Promise<any> {
+        return this.getSettings('icp');
+    }
 }
