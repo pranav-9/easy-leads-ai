@@ -5,6 +5,9 @@ export type SettingsDocument = Settings & Document;
 
 @Schema()
 export class Settings {
+    @Prop({ required: true, unique: true })
+    user: string;
+    
     @Prop({ required: true })
     type: string; // "chatbot" or "icp"
 
