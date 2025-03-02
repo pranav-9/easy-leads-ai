@@ -13,7 +13,7 @@ import {
 import { WhatsappService } from './whatsapp.service';
 import { LeadsService } from '../leads/leads.service';
 
-@Controller()
+@Controller('whatsapp')
 export class WhatsappController {
     private readonly logger = new Logger(WhatsappController.name);
 
