@@ -8,5 +8,6 @@ import { Settings, SettingsSchema } from './schemas/settings.schema';
     imports: [MongooseModule.forFeature([{ name: Settings.name, schema: SettingsSchema }])],
     controllers: [SettingsController],
     providers: [SettingsService],
+    exports: [SettingsService]
 })
 export class SettingsModule {}

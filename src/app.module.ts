@@ -5,6 +5,8 @@ import { LeadsModule } from './leads/leads.module';
 import { BotpressServiceModule } from './botpress-service/botpress-service.module';
 import { LeadScoringModule } from './lead-scoring/lead-scoring.module';
 import { SettingsModule } from './settings/settings.module';
+import { WhatsappModule } from './whatsapp/whatsapp.module';
+import { WhatsappController } from './whatsapp/whatsapp.controller';
 
 @Module({
   imports: [
@@ -14,6 +16,10 @@ import { SettingsModule } from './settings/settings.module';
     BotpressServiceModule,
     LeadScoringModule,
     SettingsModule,
+    WhatsappModule,
+  ],
+  controllers: [
+    WhatsappController,
   ],
 })
 export class AppModule {}

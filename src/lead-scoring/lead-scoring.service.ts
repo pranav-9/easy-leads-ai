@@ -1,4 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Lead } from '../leads/schema/leads.schema';
 
 interface LeadData {
     jobTitle?: string;
@@ -22,6 +25,12 @@ interface ScoringWeights {
 
 @Injectable()
 export class LeadScoringService {
+    private readonly logger = new Logger(LeadScoringService.name);
+
+    constructor(
+        // Inject any required models or services
+    ) {}
+
     private weights: ScoringWeights = {
         jobTitle: 10,
         budget: 10,
@@ -70,5 +79,61 @@ export class LeadScoringService {
         }
 
         return { score, category, shouldHandoff };
+    }
+
+    /**
+     * Updates the lead score based on message content
+     * @param lead The lead to update
+     * @param message The message from the lead
+     */
+    async updateScore(lead: Lead, message: string): Promise<void> {
+        try {
+            this.logger.log(`Updating score for lead ${lead.name} based on message`);
+            
+            // Initialize score adjustment
+            let scoreAdjustment = 0;
+            
+            // Simple keyword-based scoring
+            const lowerMessage = message.toLowerCase();
+            
+            // Positive indicators
+            if (lowerMessage.includes('interested') || lowerMessage.includes('buy')) {
+                scoreAdjustment += 10;
+            }
+            if (lowerMessage.includes('price') || lowerMessage.includes('cost')) {
+                scoreAdjustment += 5;
+            }
+            if (lowerMessage.includes('demo') || lowerMessage.includes('trial')) {
+                scoreAdjustment += 15;
+            }
+            if (lowerMessage.includes('budget') && /\d+/.test(lowerMessage)) {
+                scoreAdjustment += 20; // Mentioned specific budget with numbers
+            }
+            
+            // Negative indicators
+            if (lowerMessage.includes('not interested') || lowerMessage.includes('too expensive')) {
+                scoreAdjustment -= 15;
+            }
+            if (lowerMessage.includes('just browsing') || lowerMessage.includes('just looking')) {
+                scoreAdjustment -= 5;
+            }
+            
+            // Update lead score in database
+            // This implementation depends on your Lead model structure
+            // For example:
+            // await this.leadModel.findByIdAndUpdate(lead._id, {
+            //     $inc: { score: scoreAdjustment }
+            // });
+            
+            // For now, just log the score adjustment
+            this.logger.log(`Score adjustment for lead ${lead.name}: ${scoreAdjustment}`);
+            
+            // You might want to implement threshold-based lead status updates
+            // For example, if score > 50, update lead status to "Qualified"
+            
+        } catch (error) {
+            this.logger.error(`Error updating score for lead ${lead.name}:`, error.stack);
+            // Don't throw the error to prevent breaking the conversation flow
+        }
     }
 }
