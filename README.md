@@ -1,3 +1,107 @@
+# 🏃‍♂️ Easy Leads – Lead Qualification Engine for WhatsApp  
+
+**Easy Leads** is a backend service that automates lead qualification and personalized engagement via WhatsApp using **Botpress + OpenAI + WhatsApp Business API**. Designed for high-conversion businesses, it dynamically qualifies leads, adapts to their behavior, and routes them to a sales agent when ready—all while generating a ready-to-use **sales script** for the team.  
+
+
+![WhatsApp Image 2025-03-05 at 3 59 33 PM](https://github.com/user-attachments/assets/7f8b9e6f-828c-4fe4-91ce-8576a2683e22)
+
+---
+
+
+
+## 🚀 Key Features  
+
+- **🔗 Instant Lead Triggers**: Connects with Meta Instant Forms, Typeform, or other lead sources via webhooks.  
+- **💬 Smart WhatsApp Conversations**: Uses ChatGPT through Botpress to initiate and carry personalized, dynamic conversations.  
+- **🧠 Real-Time Qualification**: Scores leads using both **explicit (e.g. budget, role)** and **implicit (e.g. response time, engagement)** factors.  
+- **🧾 Sales Script Generator**: Generates a structured summary of the chat to assist sales agents in follow-ups.  
+- **📤 CRM & API Integrations**: Integrates with tools like HubSpot, Salesforce, or custom CRMs for seamless handoff and tracking.  
+- **🧩 Brand & Chat Personalization**: Supports fully configurable brand tone, chatbot personality, and lead engagement strategies (direct sales vs. nurturing).  
+
+---
+
+## 🧠 How It Works  
+
+### 1. **Lead Capture & Trigger**
+- Captures incoming lead data via webhook (Meta / Typeform).
+- Starts chat flow with Botpress using Botpress API.
+
+### 2. **Chat Initiation Workflow**
+- Pulls company-specific ICP & chatbot personality.
+- Kicks off WhatsApp conversation with lead via Botpress.
+- Uses dynamic prompts (via OpenAI) tailored to company’s tone and objectives.
+
+### 3. **Chat Reply Workflow**
+- Every response is analyzed in real-time.
+- Updates lead score using:
+  - **Explicit data** (job title, budget, timeline)
+  - **Implicit data** (engagement, speed, depth)
+- Follows one of two paths:
+  - 🔹 **Direct Sales** → Pushes for a call/demo.
+  - 🔹 **Long-Term Nurturing** → Adds value over time.
+
+### 4. **Handoff & Script Generation**
+- If lead is qualified (score threshold met), triggers a webhook to notify the sales team.
+- Automatically generates a **sales call script** using key insights from the chat.
+
+---
+
+## 🧱 Tech Stack
+
+| Layer              | Tech                        |
+|--------------------|-----------------------------|
+| Backend Framework  | Node.js (NestJS)            |
+| Bot Platform       | Botpress (Chat + API)       |
+| AI Integration     | OpenAI API (GPT-4)          |
+| Messaging Layer    | WhatsApp Cloud API / Twilio |
+| Database           | PostgreSQL / MongoDB        |
+| CRM Integration    | Custom or Zapier-based      |
+
+---
+
+## ⚙️ Setup & Deployment (Coming Soon)
+
+> Full documentation on environment variables, Botpress setup, OpenAI key usage, and WhatsApp integration coming soon.
+
+---
+
+## 📌 Ideal Use Cases
+
+- Fitness & Coaching Businesses  
+- Service-Based Startups  
+- High-Ticket Sales Teams  
+- B2B SaaS Qualifiers  
+- Agencies managing multiple brands  
+
+---
+
+## 👥 Contributors  
+
+- Built by [Pranav Yadav](https://github.com/pranav-9) and team  
+- Based on real-world qualification flows tested in the **fitness coaching** domain  
+
+---
+
+## 📞 Want to Use This for Your Business?
+
+Contact us at **team@onthemove.fit** or visit [onthemove.fit](https://onthemove.fit) to explore a demo.
+
+---
+
+## 🧪 Roadmap
+
+- [ ] Admin Dashboard for ICP & Chat Strategy Config  
+- [ ] Airtable CRM Plugin  
+- [ ] Analytics Dashboard (Conversion, Drop-off, Score Tracking)  
+- [ ] Custom GPT persona loader via brandbook parsing  
+
+---
+
+## License
+
+MIT License. Use freely, contribute wisely.
+
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
