@@ -1,4 +1,4 @@
-# 🏃‍♂️ Easy Leads – Lead Qualification Engine for WhatsApp  
+# 🏃‍♂️ Easy Leads – Smart WhatsApp Conversations for Lead reachouts and conversations without any manula touch
 
 **Easy Leads** is a backend service that automates lead qualification and personalized engagement via WhatsApp using **Botpress + OpenAI + WhatsApp Business API**. Designed for high-conversion businesses, it dynamically qualifies leads, adapts to their behavior, and routes them to a sales agent when ready—all while generating a ready-to-use **sales script** for the team.  
 
