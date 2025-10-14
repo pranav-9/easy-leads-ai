@@ -1,4 +1,4 @@
-# 🏃‍♂️ Easy Leads – Smart Conversations for Lead Conversions
+# 🏃‍♂️ Easy Leads – Run Lead Conversion at Scale
 
 **Easy Leads** that reaches out and engages with leads at scale. It drives smart conversations and maintains the lead score through the conversation. It handsover a converted lead to the sales tema / onboarding team with an entire client profile. It completely automates and improves the lead conversion process. Technically, it is a backend service which uses WhatsApp using **Botpress + OpenAI + WhatsApp Business API**. Designed for high-conversion businesses, it dynamically qualifies leads, adapts to their behavior, and routes them to a sales agent when ready—all while generating a ready-to-use **sales script** for the team.  
 
