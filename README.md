@@ -24,27 +24,8 @@ Technically, it is a backend service which uses WhatsApp using **Botpress + Open
 
 ## 🧠 How It Works  
 
-### 1. **Lead Capture & Trigger**
-- Captures incoming lead data via webhook (Meta / Typeform).
-- Starts chat flow with Botpress using Botpress API.
+<img width="1289" height="695" alt="Screenshot 2025-10-14 at 1 33 17 PM" src="https://github.com/user-attachments/assets/9557e467-f15e-4b9d-9543-35d26efce3c3" />
 
-### 2. **Chat Initiation Workflow**
-- Pulls company-specific ICP & chatbot personality.
-- Kicks off WhatsApp conversation with lead via Botpress.
-- Uses dynamic prompts (via OpenAI) tailored to company’s tone and objectives.
-
-### 3. **Chat Reply Workflow**
-- Every response is analyzed in real-time.
-- Updates lead score using:
-  - **Explicit data** (job title, budget, timeline)
-  - **Implicit data** (engagement, speed, depth)
-- Follows one of two paths:
-  - 🔹 **Direct Sales** → Pushes for a call/demo.
-  - 🔹 **Long-Term Nurturing** → Adds value over time.
-
-### 4. **Handoff & Script Generation**
-- If lead is qualified (score threshold met), triggers a webhook to notify the sales team.
-- Automatically generates a **sales call script** using key insights from the chat.
 
 ---
 
