@@ -1,186 +1,185 @@
-# 🏃‍♂️ Easy Leads – Run Lead Conversion at Scale
+# Easy Leads Backend
 
-**Easy Leads** that reaches out and engages with leads at scale. It drives smart conversations and maintains the lead score through the conversation. It handsover a converted lead to the sales tema / onboarding team with an entire client profile. It completely automates and improves the lead conversion process. 
+Easy Leads is a NestJS backend for automated lead engagement and qualification over WhatsApp. It stores leads and conversation context in MongoDB, generates replies with OpenAI, scores lead quality over time, and supports sales handoff once a lead becomes qualified.
 
-Technically, it is a backend service which uses WhatsApp using **Botpress + OpenAI + WhatsApp Business API**. Designed for high-conversion businesses, it dynamically qualifies leads, adapts to their behavior, and routes them to a sales agent when ready—all while generating a ready-to-use **sales script** for the team.  
-
+The current primary runtime flow is direct WhatsApp Cloud API + OpenAI + MongoDB. Botpress is still present in the codebase as a secondary / legacy integration path, but it is not the primary messaging architecture anymore.
 
 ![WhatsApp Image 2025-03-05 at 3 59 33 PM](https://github.com/user-attachments/assets/7f8b9e6f-828c-4fe4-91ce-8576a2683e22)
 
----
+## Key Features
 
+- Lead creation, retrieval, update, and phone-based lookup
+- WhatsApp outbound messaging with both free-form text and template sends
+- WhatsApp webhook handling for inbound conversations
+- Conversation summaries persisted per lead
+- Configurable chatbot and ICP settings stored in MongoDB
+- Rule-based lead scoring plus OpenAI-assisted qualification analysis
+- Sales handoff fields stored on leads for downstream follow-up
 
+## Technical Architecture
 
-## 🚀 Key Features  
+Easy Leads is a single NestJS service organized into domain modules:
 
-- **🔗 Instant Lead Triggers**: Connects with Meta Instant Forms, Typeform, or other lead sources via webhooks.  
-- **💬 Smart WhatsApp Conversations**: Uses ChatGPT through Botpress to initiate and carry personalized, dynamic conversations.  
-- **🧠 Real-Time Qualification**: Scores leads using both **explicit (e.g. budget, role)** and **implicit (e.g. response time, engagement)** factors.  
-- **🧾 Sales Script Generator**: Generates a structured summary of the chat to assist sales agents in follow-ups.  
-- **📤 CRM & API Integrations**: Integrates with tools like HubSpot, Salesforce, or custom CRMs for seamless handoff and tracking.  
-- **🧩 Brand & Chat Personalization**: Supports fully configurable brand tone, chatbot personality, and lead engagement strategies (direct sales vs. nurturing).  
+| Module | Responsibility |
+| --- | --- |
+| `Leads` | Stores lead records, creates leads, updates lead state, and supports phone-based lookup |
+| `Whatsapp` | Sends WhatsApp messages, handles template sends, verifies webhooks, processes inbound messages, and drives the main conversation flow |
+| `LeadScoring` | Calculates initial lead scores and updates scores over time using rules plus OpenAI analysis |
+| `Settings` | Stores chatbot configuration and ICP configuration |
+| `Botpress` | Secondary / legacy messaging path still available in the repo |
 
----
+### Persistent Data
 
-## 🧠 How It Works  
+- `Lead`: contact details, score, category, handoff fields, and AI-derived insights
+- `Settings`: stored config blobs for `chatbot` and `icp`
+- `ChatSummary`: running conversation summary keyed by lead
 
-<img width="1289" height="695" alt="Screenshot 2025-10-14 at 1 33 17 PM" src="https://github.com/user-attachments/assets/9557e467-f15e-4b9d-9543-35d26efce3c3" />
+### Primary Outbound Flow
 
+1. A lead is created or loaded.
+2. The service fetches chatbot and ICP settings from MongoDB.
+3. An initial message is generated from lead context and settings.
+4. The message is sent through the WhatsApp Cloud API.
+5. A conversation summary record is created or updated for the lead.
 
----
+### Primary Inbound Flow
 
-## 🧱 Tech Stack
+1. Meta sends a webhook event to the WhatsApp controller.
+2. The service validates and parses the webhook payload.
+3. The lead is found by phone number or auto-created if missing.
+4. Existing conversation summary is loaded from MongoDB.
+5. OpenAI generates the next response using prior summary plus the new message.
+6. The summary is updated, the reply is sent via WhatsApp, and the lead score is recalculated.
 
-| Layer              | Tech                        |
-|--------------------|-----------------------------|
-| Backend Framework  | Node.js (NestJS)            |
-| Bot Platform       | Botpress (Chat + API)       |
-| AI Integration     | OpenAI API (GPT-4)          |
-| Messaging Layer    | WhatsApp Cloud API / Twilio |
-| Database           | PostgreSQL / MongoDB        |
-| CRM Integration    | Custom or Zapier-based      |
+### Lead Scoring Flow
 
----
+Lead scoring combines:
 
-## ⚙️ Setup & Deployment (Coming Soon)
+- rule-based signals such as interest, budget mentions, pricing questions, and objections
+- OpenAI-based analysis for brand alignment, ICP match, insights, and client description
 
-> Full documentation on environment variables, Botpress setup, OpenAI key usage, and WhatsApp integration coming soon.
+The result is written back to the lead record as score, category, handoff state, and AI-generated metadata.
 
----
+### Botpress Status
 
-## 📌 Ideal Use Cases
+Botpress routes and services still exist in the repository and can start/respond to conversations, but the README reflects the current primary architecture: direct WhatsApp handling through the `Whatsapp` module. Botpress should be treated as secondary / legacy unless the project is intentionally moved back to a Botpress-first flow.
 
-- Fitness & Coaching Businesses  
-- Service-Based Startups  
-- High-Ticket Sales Teams  
-- B2B SaaS Qualifiers  
-- Agencies managing multiple brands  
+## Tech Stack
 
----
+| Layer | Technology |
+| --- | --- |
+| Backend framework | NestJS on Node.js |
+| Database | MongoDB with Mongoose |
+| Messaging | WhatsApp Cloud API |
+| AI | OpenAI API |
+| Secondary integration | Botpress |
+| Transport helpers | `@nestjs/axios` / RxJS |
 
-## 👥 Contributors  
+## Main Endpoints
 
-- Built by [Pranav Yadav](https://github.com/pranav-9) and team  
-- Based on real-world qualification flows tested in the **fitness coaching** domain  
+### Leads
 
----
+- `POST /leads`
+- `GET /leads`
+- `GET /leads/:id`
+- `PATCH /leads/:id`
 
-## 📞 Want to Use This for Your Business?
+### Settings
 
-Contact us at **team@onthemove.fit** or visit [onthemove.fit](https://onthemove.fit) to explore a demo.
+- `POST /settings/chatbot`
+- `POST /settings/icp`
+- `GET /settings/:type`
 
----
+### WhatsApp
 
-## 🧪 Roadmap
+- `POST /whatsapp/send`
+- `POST /whatsapp/send-template`
+- `POST /whatsapp/start/:leadId`
+- `GET /whatsapp/webhook`
+- `POST /whatsapp/webhook`
 
-- [ ] Admin Dashboard for ICP & Chat Strategy Config  
-- [ ] Airtable CRM Plugin  
-- [ ] Analytics Dashboard (Conversion, Drop-off, Score Tracking)  
-- [ ] Custom GPT persona loader via brandbook parsing  
+### Lead Scoring
 
----
+- `POST /lead-scoring/score`
+
+### Botpress Secondary / Legacy
+
+- `POST /botpress/start`
+- `POST /botpress/respond`
+
+## Developer Setup
+
+### Install
+
+```bash
+npm install
+```
+
+### Run
+
+```bash
+npm run start
+npm run start:dev
+npm run start:prod
+```
+
+The service listens on `PORT` if provided, otherwise it defaults to `8000`.
+
+### Build
+
+```bash
+npm run build
+```
+
+### Test
+
+```bash
+npm test
+npm run test:e2e
+```
+
+## Environment Variables
+
+### Required for Primary Flow
+
+- `MONGO_URI`
+- `OPENAI_API_KEY`
+- `WHATSAPP_PHONE_NUMBER_ID`
+- `WHATSAPP_API_TOKEN`
+- `WHATSAPP_VERIFY_TOKEN`
+
+### Optional
+
+- `PORT`
+
+### Optional for Botpress / Legacy Paths
+
+- `BOTPRESS_API_TOKEN`
+- `BOTPRESS_WORKSPACE_ID`
+- `BOTPRESS_BOT_ID`
+- `BOTPRESS_API_KEY`
+
+## Supporting Docs
+
+- [service-doc.md](./service-doc.md) for service-level notes
+- [service-api.md](./service-api.md) for additional API documentation
+
+This README is the best high-level description of the current primary runtime flow. The supporting docs remain useful reference material, especially for older Botpress-oriented behavior still present in the codebase.
+
+## Typical Use Cases
+
+- Fitness and coaching businesses
+- High-ticket sales workflows
+- Service businesses qualifying inbound leads
+- Teams that want WhatsApp-first lead engagement with scoring and handoff
+
+## Roadmap
+
+- Admin dashboard for ICP and chatbot strategy configuration
+- CRM integrations for downstream handoff
+- Analytics for conversion, drop-off, and score changes
+- Stronger separation of primary WhatsApp flow and secondary Botpress legacy flow
 
 ## License
 
-MIT License. Use freely, contribute wisely.
-
-
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
-
-```bash
-$ npm install
-```
-
-## Compile and run the project
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+UNLICENSED
