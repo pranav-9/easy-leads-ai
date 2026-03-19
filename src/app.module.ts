@@ -1,25 +1,31 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule } from '@nestjs/config';
+import { HttpModule } from '@nestjs/axios';
 import { LeadsModule } from './leads/leads.module';
-import { BotpressServiceModule } from './botpress-service/botpress-service.module';
+import { WhatsappModule } from './whatsapp/whatsapp.module';
 import { LeadScoringModule } from './lead-scoring/lead-scoring.module';
 import { SettingsModule } from './settings/settings.module';
-import { WhatsappModule } from './whatsapp/whatsapp.module';
-import { WhatsappController } from './whatsapp/whatsapp.controller';
+import { BotpressServiceModule } from './botpress-service/botpress-service.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    MongooseModule.forRoot(process.env.MONGO_URI || 'mongodb://localhost:27017/leads'),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGO_URI'),
+      }),
+      inject: [ConfigService],
+    }),
+    HttpModule,
     LeadsModule,
-    BotpressServiceModule,
+    WhatsappModule,
     LeadScoringModule,
     SettingsModule,
-    WhatsappModule,
-  ],
-  controllers: [
-    WhatsappController,
+    BotpressServiceModule,
   ],
 })
 export class AppModule {}

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LeadsService } from './leads.service';
 import { LeadsController } from './leads.controller';
@@ -12,7 +12,7 @@ import { Settings, SettingsSchema } from '../settings/schemas/settings.schema';
       { name: Lead.name, schema: LeadSchema },
       { name: Settings.name, schema: SettingsSchema }
     ]),
-    LeadScoringModule
+    forwardRef(() => LeadScoringModule)
   ],
   controllers: [LeadsController],
   providers: [LeadsService],

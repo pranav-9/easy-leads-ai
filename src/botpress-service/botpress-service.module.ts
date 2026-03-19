@@ -10,11 +10,13 @@ import { LeadScoringModule } from '../lead-scoring/lead-scoring.module';
 
 @Module({
   imports: [
-    HttpModule.register({}),  // Register HttpModule with empty config
-    MongooseModule.forFeature([{ name: ChatSummary.name, schema: ChatSummarySchema }]),
+    HttpModule.register({}), // Register HttpModule with empty config
+    MongooseModule.forFeature([
+      { name: ChatSummary.name, schema: ChatSummarySchema },
+    ]),
     LeadsModule,
-    SettingsModule,  // Remove .forRoot()
-    LeadScoringModule
+    SettingsModule, // Remove .forRoot()
+    LeadScoringModule,
   ],
   controllers: [BotpressController],
   providers: [BotpressService],

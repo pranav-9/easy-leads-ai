@@ -1,44 +1,77 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
-@Schema({ timestamps: true })
+export type LeadDocument = Lead & Document;
+
+@Schema({ timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 export class Lead {
   @Prop({ required: true })
   name: string;
+
+  @Prop({ required: true })
+  phone: string;
 
   @Prop()
   email: string;
 
   @Prop()
-  phone: string;
+  company: string;
 
   @Prop()
-  jobTitle?: string;
+  jobTitle: string;
 
   @Prop()
-  budget?: number;
+  industry: string;
 
-  @Prop()
-  companySize?: number;
-
-  @Prop()
-  industry?: string;
-
-  @Prop()
-  engagementLevel?: number;
-
-  @Prop()
-  responseTime?: number;
-
-  @Prop()
-  questionsAsked?: number;
+  @Prop({ default: 'New' })
+  status: string;
 
   @Prop({ default: 0 })
-  score: number; // Computed by Lead Scoring Service
+  score: number;
 
   @Prop({ default: 'Cold' })
-  category: string; // Hot, Warm, Cold
+  category: string;
+
+  @Prop()
+  source: string;
+
+  @Prop()
+  notes: string;
+
+  @Prop({ default: false })
+  shouldHandoff: boolean;
+
+  @Prop()
+  engagementStrategy: string;
+
+  @Prop()
+  salesAgentId: string;
+
+  @Prop()
+  handoffStatus: string;
+
+  @Prop()
+  budget: number;
+
+  @Prop()
+  brandAlignment: number;
+
+  @Prop()
+  icpMatch: number;
+
+  @Prop()
+  aiInsights: string;
+
+  @Prop()
+  clientDescription: string;
+
+  @Prop({ type: Date, default: Date.now })
+  lastInteraction: Date;
 }
 
-export type LeadDocument = Lead & Document;
 export const LeadSchema = SchemaFactory.createForClass(Lead);
+
+// Add virtual property for leadId
+LeadSchema.virtual('leadId').get(function() {
+  return this._id ? this._id.toString() : undefined;
+});
